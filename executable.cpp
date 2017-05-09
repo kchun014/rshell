@@ -2,13 +2,14 @@
 #include <vector>
 #include "EXECUTABLE_H"
 
-Executable ( );
+Executable () {};
 
-Executable ( Base * process ) { 
-    this->Exec = process
-    
+virtual void conversion (const std::vector<std::string> & arguments, std::vector<char*> & convertArg) {
+    std::transform(arguments).begin(), arguments.end(), std::back_inserter(convertArg), convert);
 }
 
-virtual bool execute ( ) {
-    return this->Exec->execute( );
+virtual char *convert(const std::string & str) {
+   char *pc = new char[str.size()+1];
+   std::strcpy(pc, str.c_str());
+   return pc; 
 }

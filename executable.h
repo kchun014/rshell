@@ -6,18 +6,16 @@
 
 class Executable  : public Base {
     protected:
-    Base * Exec;
-    
-    std::vector< const char * > arguments;
-    
+    std::vector< std::string > arguments;
+    std::vector< char * > convertArg;
     bool success = false;
     //returns whether its run, sends back to connector.
     
     public:
     
     Executable ( );
-    Executable ( Base * process );
-    
-    virtual bool execute ( );
+    virtual void conversion (arguments);
+    virtual bool execute () = 0;
+    virtual char *convert(const std::string & str);
 };
 #endif

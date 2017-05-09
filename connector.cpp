@@ -6,19 +6,19 @@ virtual void set_bool(bool c) {//Set boolean flag for whether the process ran co
     this->t_f = c;
 }
 
-//sets the executable object, using either a string (singular command), and a vector of strings(ONLY flags)
-virtual void set_executable ( char * str, vector < const char * > svec ) {
-    if ( * str == "ls" ) {
-        this->process = new ls( str, svec );
+//sets the executable object, using either a string (singular command), and if needed, a vector of strings(ONLY flags)
+virtual void set_executable ( std::vector < std::string > cvec ) {
+    if (*svec[0] == "ls") {
+        this->process = new ls(svec[0], svec );
     }
-    if ( * str == "echo" ) {
-        this->process = new echo( str, svec );
+    if (*svec[0] == "echo") {
+        this->process = new echo(svec[0], svec );
     }
-    if ( * str == "mkdir" ) {
-        this->process = new mkdir( str, svec );
+    if (*svec[0] == "mkdir") {
+        this->process = new mkdir(svec[0], svec );
     }
-    if ( * str == "git" ) {
-        this->process = new git(str, svec);
+    if (*svec[0] == "git") {
+        this->process = new git(svec[0], svec);
     }
     else {
         cout << "Error in parsing command." << endl;
@@ -26,5 +26,6 @@ virtual void set_executable ( char * str, vector < const char * > svec ) {
 }
 
 virtual bool execute ( ) {
+    this->set_executable(svec);
     return this->process->execute( );
 }

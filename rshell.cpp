@@ -43,19 +43,19 @@ int main( ) {
             //Serves to parse the tokens further, with vectors.
             string temp = *tok_iter;
             cout << "<" << *tok_iter << "> ";
-            if ( temp == "||") {
-                orConn.push_back( i );
-                connectors.push_back( i );
-            }
-            if ( temp == "&&" ) {
-                andConn.push_back( i );
-                connectors.push_back( i );
-            }
-            if ( temp.at( 0 ) == '#' ) {
-                commentary = true;
-                comment.push_back( i );
-                connectors.push_back( i );
-            }
+            // if ( temp == "||") {
+            //     orConn.push_back( i );
+            //     connectors.push_back( i );
+            // }
+            // if ( temp == "&&" ) {
+            //     andConn.push_back( i );
+            //     connectors.push_back( i );
+            // }
+            // if ( temp.at( 0 ) == '#' ) {
+            //     commentary = true;
+            //     comment.push_back( i );
+            //     connectors.push_back( i );
+            // }
             // if ( temp.at( temp.length() - 1 ) == ';') {
             //     semicolons.push_back( i );
             //     connectors.push_back( i );
@@ -64,9 +64,13 @@ int main( ) {
         
         tokenizer::iterator tok_iter2 = tokens.begin();
         string temp2 = *tok_iter2;
-        while ( ( temp2.at( temp2.length( ) - 1 ) ) != ';' && ( tok_iter != tokens.end( ) ) ) {
-            if( temp2 )
+        while ( ( tok_iter != tokens.end( ) ) ) {
             commandsList.push_back( temp2 );
+            if( temp2.at( temp2.length( ) - 1 ) == ';') {
+                semicolon sem = new semicolon ( commandsList );
+                commandsList.clear( );//Run each semicolon one at a time.
+            }
+            
             tok_iter2++;
             temp2 = *tok_iter2;
         }
