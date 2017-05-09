@@ -3,15 +3,21 @@
 #include <string>
 #include <vector>
 //Use boost library.
-class Executable {
+
+class Executable  : public Base {
     protected:
-    std::vector< const std::char * > arguments;
+    Base * Exec;
+    
+    std::vector< const char * > arguments;
+    
     bool success = false;
     //returns whether its run, sends back to connector.
     
     public:
-    virtual bool return_conn ( ) {
-        return success;
-    }
+    
+    Executable ( );
+    Executable ( Base * process );
+    
+    virtual bool execute ( );
 };
 #endif

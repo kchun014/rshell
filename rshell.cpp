@@ -8,6 +8,9 @@
 #include <vector>
 #include <boost/tokenizer.hpp>
 
+char * key ( const string & str );
+void exit( bool & val );
+
 using namespace std;
 
 int main( ) {
@@ -61,11 +64,12 @@ int main( ) {
         
         tokenizer::iterator tok_iter2 = tokens.begin();
         string temp2 = *tok_iter2;
-        while ( temp2.at( temp2.length( ) - 1 ) != ';' ) {
+        while ( ( temp2.at( temp2.length( ) - 1 ) ) != ';' && ( tok_iter != tokens.end( ) ) ) {
+            if( temp2 )
             commandsList.push_back( temp2 );
+            tok_iter2++;
+            temp2 = *tok_iter2;
         }
-        
-        
         
         cout << endl;
         
