@@ -1,15 +1,55 @@
-#include <string>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <iostream>
+#include <string.h>
 #include <vector>
-#include "EXECUTABLE_H"
+#include <algorithm>
+#include "Executable.h"
+#include <iostream>
+using namespace std;
 
-Executable () {};
-
-virtual void conversion (const std::vector<std::string> & arguments, std::vector<char*> & convertArg) {
-    std::transform(arguments).begin(), arguments.end(), std::back_inserter(convertArg), convert);
+void Executable::conversion() {
+    // vector<string>::iterator beg = arguments.begin();
+    for(unsigned i = 0; i < this->arguments.size(); i++) {
+        convertArg.push_back(convert(this->arguments.at(i)));
+    }
 }
 
-virtual char *convert(const std::string & str) {
-   char *pc = new char[str.size()+1];
-   std::strcpy(pc, str.c_str());
-   return pc; 
+char* Executable::convert (const string & str) {
+    char *pc = new char[str.size() + 1];
+    strcpy(pc, str.c_str());
+    return pc;
+}
+
+bool Executable::execute() {
+    conversion();
+    int status;
+    char ** convertArgP = &convertArg[0];
+    pid_t pid = fork();
+    if (pid == -1) {
+       cout << "Error forking!" << endl;
+       return false;
+    }
+    else if (pid == 0) {
+        if(execvp(convertArgP[0], convertArgP) == -1) {
+            perror("exec");
+            return false;
+        }
+    }
+    else {//Parent
+        wait(&status); 
+        for(unsigned i = 0; i < convertArg.size(); i++) {
+            delete[] convertArg[i];
+        }
+        if (status == -1) //If child fails
+        {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    return true;
 }
