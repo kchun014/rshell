@@ -74,3 +74,4 @@ v) using commands with logical operators, then ending with done crashes the shel
 
 vi) cannot use logical operators with done, will exit regardless.
 
+vii) Cannot use echo with multiple terms (i.e. echo "Hello everybody")
