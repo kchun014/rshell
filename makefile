@@ -1,10 +1,11 @@
 CC=g++
 CC_FLAGS= -g -Wall -Werror -ansi -pedantic
-EXEC=rshell.exe
+EXEC=Rshell.exe
 SOURCES=$(wildcard *.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
 
 all: Rshell Executable Connector Semicolon
+	$(CC) src/*.cpp -o $(EXEC) #helps to make the executable.
 
 Rshell: Bin
 	$(CC) -c $(CC_FLAGS) src/Rshell.cpp -o ./bin/rshell
