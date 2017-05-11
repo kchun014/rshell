@@ -72,6 +72,4 @@ iv) mkdir does not execute "or" commands after failure, if file already exists.
 
 v) using commands with logical operators, then ending with done crashes the shell.
 
-vi) cannot use logical operators with done, will exit regardless.
-
-vii) Cannot use echo with multiple terms (i.e. echo "Hello everybody")
+vi) Cannot use echo with multiple terms (i.e. echo "Hello everybody")
