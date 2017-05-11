@@ -1,0 +1,8 @@
+ls -a; echo hello && mkdir whatsup
+echo downloading && echo finished
+ls -a || mkdir folderz; echo finished
+echo breaks; echo here ||&&||
+lsfijdafajd && echo norun;
+echo broken; done;
+done
+

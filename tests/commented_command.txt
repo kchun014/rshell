@@ -1,0 +1,8 @@
+ls -a; #this shouldnt run; echo hello
+#ls shouldnt run####
+echo crap; #done;
+echo need; echo# better# tests
+e#cho testing#
+ls -a; mkdir virus
+echo unloading; echo virus# echo now
+done

@@ -1,0 +1,6 @@
+echo hello; done
+ls -a && done;
+echo hello || done
+donedonedonedone; done;
+done && done;
+done

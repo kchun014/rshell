@@ -1,0 +1,7 @@
+ls -a;
+ls
+echo hello
+mkdir hi
+ls -a
+done
+

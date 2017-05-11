@@ -19,7 +19,7 @@ void set_exit(bool & val);
 int main( ) {
     // initialize our value(keeps the loop going)
     //intialize input string, and vectors possessing indices of their respective symbol.
-    //ie. 'connectors' holds the index of all connectors in the input string; 'semicolons' holds the indices of all semicolons, etc. 
+    //ie. 'connectors' holds the index of all connectors in the input string; 'semicolons' holds the indices of all semicolons, etc.
     bool val = true;
     string input;
     vector < string > commandsList;
@@ -34,9 +34,9 @@ int main( ) {
         typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
         boost::char_separator<char> key(" \n");//Originally separated by ; and # as well, but that would remove them, it's better to keep those in.
         tokenizer tokens(input, key);//initialize a tokenizer to convert input into tokens, separated by whitespaces.
-        
+
         tokenizer::iterator tok_iter = tokens.begin();
-        
+
         for(; tok_iter != tokens.end(); ++tok_iter)
         {
             string temp2 = *tok_iter;
@@ -59,6 +59,7 @@ int main( ) {
                 commandsList.clear();//Run each semicolon one at a time.
             }
         }
+        commandsList.clear();
         if (val == false) {
             break;
         }
