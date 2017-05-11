@@ -22,5 +22,5 @@ Semicolon: Bin
 Bin:
 	mkdir -p bin
 	
-Clean:
-	rm -rf bin
+clean:
+	rm -rf ./bin
