@@ -24,12 +24,13 @@ Created and maintained by Kau Chung and Andre Cuevas.
 		
 -flag extensions
 
--highly optimized exit commands
-
 -now including git commands!
 
--Custom end command (Done)
+-Custom end command ("done")
 
+-Now has "test" and "[]" functionality, in order to test whether a filepath exists.
+
+-Now works with logical precedence (using parentheses)
 
 ## Tests
 Tested various combinations of commands, logical operators, end statements, and exit calls.
@@ -60,16 +61,16 @@ Copyright © 2007 Free Software Foundation, Inc. <http://fsf.org/>
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 
 Bugs: 
-i) No error given when boolean operators are stacked (i.e. || && || &&)
+i) Does not work when semicolon is in the middle of an argument 
+    (i.e. echo he;llo does not output "he", then error on llo as it should.)
 
-ii) no error given when only one argument given of logical operators (||, &&, ;).
+ii) Does not work if parentheses, or brackets, are in the middle of an argument 
 
-iii) does not work when semicolons are in the middle of an argument 
+iii) does not error, or let statement continue, if bracket doesnt end.
 
-	(i.e. echo he;llo will echo "he;llo", when it should output he and give an error for "llo")
+iv) does not error, or let statement continue, if parentheses doesnt end.
 
-iv) mkdir does not execute "or" commands after failure, if file already exists.
+v) Cannot mkdir with spaces.
 
-v) using commands with logical operators, then ending with done crashes the shell.
+vi) Cannot check for existence of files with spaces in name.
 
-vi) Cannot use echo with multiple terms (i.e. echo "Hello everybody")
