@@ -55,7 +55,6 @@ void Semicolon::initialize() {
     //code functionality for parentheses.
     for(unsigned i = 0; i <= vArgs.size() - 1; i++) {
         //Parentheses
-        /*
         if(vArgs.at(i).size() != 0) {//if not empty.
             if(vArgs.at(i).at(0) == '(') {
                 if(vArgs.at(i).at(vArgs.at(i).length() - 1) != ')') {
@@ -91,7 +90,6 @@ void Semicolon::initialize() {
             }
 
         }
-        */
         if(vArgs.at(i) != "&&" && vArgs.at(i) != "||") {//If its not special, then push back
             tempPush.push_back(vArgs.at(i));
         }//Else is special, so we have to deal with it., but is never entering bottom loop.
