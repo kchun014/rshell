@@ -3,7 +3,7 @@
 // Input Class
 //--------------------------------------------------------------------------
 void Input::initialize() {
-     //parsing for semicolons
+     //parsing for semicolons 
      for(unsigned i = 0; i <= vArgs.size() - 1; i++) {
          if( ( (vArgs.at(i).at(vArgs.at(i).length() - 1) == ';' ) || (( i == vArgs.size() - 1) && tempc.size() != 0) ) ) {
              if(vArgs.at(i) == ";") {
@@ -15,7 +15,7 @@ void Input::initialize() {
              else {
                  tempc.push_back(vArgs.at(i));
              }
-             //initializes semicolons
+             //initializes semicolons 
              Base * temp = new Semicolon(tempc);
             //pushes to semis
              semis.push_back(temp);
@@ -42,16 +42,7 @@ void Semicolon::initialize() {
     //Parses for and/or
     checkPass.push_back(0);
     pFlag = false;
-    //First pass to determine signs.
-    for(unsigned i = 0; i <= vArgs.size() - 1; i++) {
-        if(vArgs.at(i) == "&&") {
-            checkPass.push_back(1);
-        }
-        else if (vArgs.at(i) == "||") {
-            checkPass.push_back(2);
-        }
-
-    }
+    
     //code functionality for parentheses.
     for(unsigned i = 0; i <= vArgs.size() - 1; i++) {
         //Parentheses
@@ -63,7 +54,7 @@ void Semicolon::initialize() {
                     pFlag = true;
                     continue;
                 }
-
+                
                 else {//Else its something like (echo)
                     //cout << "In second" << endl;
                     pFlag = false;
@@ -88,8 +79,16 @@ void Semicolon::initialize() {
                 tempPush2.clear();
                 continue;
             }
-
+            
         }
+        //First pass to determine signs.
+        if(vArgs.at(i) == "&&") {
+            checkPass.push_back(1);
+        }
+        else if (vArgs.at(i) == "||") {
+            checkPass.push_back(2);
+        }
+        
         if(vArgs.at(i) != "&&" && vArgs.at(i) != "||") {//If its not special, then push back
             tempPush.push_back(vArgs.at(i));
         }//Else is special, so we have to deal with it., but is never entering bottom loop.
@@ -112,15 +111,16 @@ void Semicolon::initialize() {
 
 bool Semicolon::execute() {
     this->initialize();
-    //doesnt? enter loop? or doesnt go to hello inside zz
     for(unsigned i = 0; i < commands.size(); i++) {
         if(i == 0) {
             logicCheck = commands.at(0)->execute();
         }
-        else if ( ( (checkPass.at(i) == 1) && (logicCheck) ) || ( (checkPass.at(i) == 2) && (!logicCheck) ) )  {
+        else if ( ( (checkPass.at(i) == 1) && (logicCheck == true) ) || 
+        ( (checkPass.at(i) == 2) && (logicCheck == false) ) )  {
             logicCheck = commands.at(i)->execute();
         }
     }
+    
     return logicCheck;
 }
 
@@ -129,13 +129,6 @@ bool Semicolon::execute() {
 //--------------------------------------------------------------------------
 
 void Logic::initialize() {
-    //
-    // cout << "In Logic:" << endl;
-    // for(unsigned i = 0; i < vArgs.size(); i++) {
-    //     cout << "vArgs.at(" << i << "):" << vArgs.at(i) << endl;
-    // }
-    // cout << "End Logic: " << endl << endl;
-
     //calls children's initialize functions.
     this->conversion();
     if(vArgs.at(0).at(0) == '[' || vArgs.at(0) == "test") {
@@ -144,7 +137,7 @@ void Logic::initialize() {
     else {
         this->child = new Execute(convertedC);
     }
-
+    
 }
 void Logic::conversion() {
     // vector<string>::iterator beg = arguments.begin();
@@ -168,7 +161,6 @@ bool Logic::execute() {
     this->initialize();
     //Run child, return the status.
     bool temp = this->child->execute();
-    this->del();
     return temp;
 }
 
@@ -201,7 +193,7 @@ bool Execute::execute() {
         //in parent.
         do {
             tpid = wait(&child_status);//Get child_status which is a pid.
-            if(tpid != child_pid) {
+            if(tpid != child_pid) { 
                 cout << "Error!" << endl;
             }
         } while(tpid != child_pid);
@@ -243,7 +235,7 @@ bool Test::execute() {
     return this->fileExists();
 }
 
-//[ -e test/dir/file]
+//[ -e test/dir/file] 
 //Flags: -e, -f, -d, e = exists, f = is a file, d = is a directory.
 //From asignment: use S_ISDIR flag and S_ISREG.
 
@@ -251,7 +243,7 @@ bool Test::execute() {
 bool Test::fileExists() {
     if( access( vArgs.at(vArgs.size() - 1).c_str(), 0) == 0) {
         struct stat status;
-
+        
         if((stat(vArgs.at(vArgs.size() - 1).c_str(), &status) == 0) && testFlag == 0) {
             cout << "(True)" << endl;
             return true;
@@ -268,7 +260,7 @@ bool Test::fileExists() {
             cout << "(False)" << endl;
             return false;
         }
-
+        
     }
     cout << "(False)" << endl;
     return false;
