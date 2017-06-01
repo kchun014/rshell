@@ -74,3 +74,5 @@ v) Cannot mkdir with spaces.
 
 vi) Cannot check for existence of files with spaces in name.
 
+vii) Doesn't properly check for ")" before "(", nor ensure existence of ")" after.
+
