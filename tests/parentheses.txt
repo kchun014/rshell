@@ -1,0 +1,12 @@
+(echo hello)
+echo (hello)
+(echo hello && echo hi) || echo bye
+(echo (hello) || echo hi) && echo great
+(((echo (hello)) || echo goodmorrow) && echo macaroni)
+(ls -a && mkdir NEWFOLDER) && ls -a
+(ls -a) || mkdir OLDFOLDER
+((((((ls -a))))))
+(ls -a) ()() echo hello || echo goodbye
+(done)
+(((done))) || ls -a
+

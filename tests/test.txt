@@ -1,0 +1,9 @@
+test -e rshell/test/commented_command.sh
+test -d rshell/test
+test -f rshell/test/parentheses.txt
+test rshell/test/exit.txt
+[ -e rshell/test/commented_command.sh ]
+[ -d rshell/test ]
+[ -f rshell/test/multi_command.sh ]
+[ rshell/test/multi_command.txt ]
+

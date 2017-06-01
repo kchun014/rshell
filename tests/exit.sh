@@ -1,4 +1,5 @@
 #!/bin/sh
 #exit commands
-./bin/rshell < exit_commands.txt
+./bin/rshell < exit.txt
+
 
