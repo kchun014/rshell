@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include <iostream>
 #include <string.h>
 #include <vector>
@@ -23,6 +24,11 @@ class Base {
     
     virtual void initialize() = 0;
     virtual bool execute() = 0;
+    virtual char* convert(const string & str) {
+        char *pc = new char[str.size() + 1];//create stored memory, make sure to remove later
+        strcpy(pc, str.c_str());
+        return pc;
+    }
 };
 
 class Input : public Base {
@@ -46,7 +52,8 @@ class Semicolon : public Base {
     bool logicCheck;
     bool testFlag;
     bool pFlag;
-    
+    bool pipeFlag;
+
     public:
     Semicolon(vector<string> args) : Base(args) {}
     
@@ -64,7 +71,6 @@ class Logic : public Base {//Will change to require a boolean.
     virtual void initialize();
     virtual bool execute();
     void conversion();
-    char* convert(const string & str);
     void del();
 };
 
@@ -90,5 +96,25 @@ class Test : public Base {
     void initialize();
     bool execute();
 };
+
+class Pipe : public Base {
+    private:
+    vector<string> cPush;
+    vector<char *> convertedC;
+    vector<vector<string> > masterPush;
+    vector<vector<char *> > masterConvert;
+    vector<int> redirVals;
+    vector<string> redirArgs;
+    
+    public:
+    Pipe(vector<string> args) : Base(args) {}
+    void initialize();
+    bool execute();
+    void conversion();
+    void object();
+    void output(int redir_val, const char* out_file, vector<char *> conv);
+    void input(const char* in_file, vector<char *> conv);
+};
+
 
 #endif

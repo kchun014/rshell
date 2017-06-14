@@ -89,17 +89,31 @@ void Semicolon::initialize() {
             checkPass.push_back(2);
         }
         
-        if(vArgs.at(i) != "&&" && vArgs.at(i) != "||") {//If its not special, then push back
+        if(((vArgs.at(i) != "&&") && (vArgs.at(i) != "||") && (vArgs.at(i) != "|")) || (pipeFlag)) {//If its not special, then push back, or if pipeFlag true.
             tempPush.push_back(vArgs.at(i));
         }//Else is special, so we have to deal with it., but is never entering bottom loop.
         else {//Runs if || or &&
-            if(tempPush.size() != 0) {//Don't push empty vector.
+            if(tempPush.size() != 0 && (vArgs.at(i) == "&&" || vArgs.at(i) == "||")) {//Don't push empty vector.
                 Base * L = new Logic(tempPush);
                 //pushes onto commands
                 commands.push_back(L);
                 tempPush.clear();
             }
+            if(tempPush.size() != 0 && vArgs.at(i) == "|") {
+                pipeFlag=true;
+                tempPush.push_back(vArgs.at(i));
+                continue;
+            }
         }
+        
+        if(pipeFlag && (i == vArgs.size() || vArgs.at(i) == "&&" || vArgs.at(i) == "||" || vArgs.at(i) == ";")) {
+            pipeFlag = false;
+            Base * L = new Pipe(tempPush);
+            commands.push_back(L);
+            tempPush.clear();
+        }
+        //create parsing to redirect based on input >(overwrite) or >>(append)
+        //use dup, dup2
         if (i == vArgs.size() - 1 && tempPush.size() != 0) {//Have to code, so it runs at the end as well.
             Base * L = new Logic(tempPush);
             //pushes onto commands
@@ -139,6 +153,7 @@ void Logic::initialize() {
     }
     
 }
+
 void Logic::conversion() {
     // vector<string>::iterator beg = arguments.begin();
     for(unsigned i = 0; i < this->vArgs.size(); i++) {
@@ -146,11 +161,13 @@ void Logic::conversion() {
         //Push back char * for execvp use.
     }
 }
+/*
 char* Logic::convert(const string & str) {
     char *pc = new char[str.size() + 1];//create stored memory, make sure to remove later
     strcpy(pc, str.c_str());
     return pc;
 }
+*/
 void Logic::del() {
     for(unsigned i = 0; i < convertedC.size(); i++) {
         delete[] convertedC.at(i);//remove stored memory
@@ -163,7 +180,6 @@ bool Logic::execute() {
     bool temp = this->child->execute();
     return temp;
 }
-
 //--------------------------------------------------------------------------
 // Execute Class
 //--------------------------------------------------------------------------
@@ -265,3 +281,226 @@ bool Test::fileExists() {
     cout << "(False)" << endl;
     return false;
 }
+
+//--------------------------------------------------------------------------
+// Pipe Class
+//--------------------------------------------------------------------------
+void Pipe:: initialize() {
+    unsigned k = 0;
+    //int p[2]; //For use in dup.
+    while(k < vArgs.size()) {
+        while(vArgs.at(k) != "|" || k < vArgs.size()) {//Parse for everything between pipes.
+            cPush.push_back(vArgs.at(k));
+            k++;
+        }//Need to parse for " || vArgs.at(i) == "<" || vArgs.at(i) == ">>" || vArgs.at(i) == ">" ||"
+        //Preserve cPushes.
+        //Should deal with piping here, in order to command input/output.
+        masterPush.push_back(cPush);
+        cPush.clear();
+        k++;
+    }
+    //check for ">" "<<" and "<"
+    for(unsigned i = 0; i < this->masterPush.size(); i++) {
+        for(unsigned j = 0; j < this->masterPush.at(i).size(); j++) {
+            if(masterPush[i][j] == "<") {
+                redirVals.push_back(3); // 3 == input redir
+                redirArgs.push_back(masterPush.at(i).at(masterPush.at(i).size() - 1));//Push back last argument
+                masterPush.at(i).resize(j);
+                break;
+            }
+            else if(masterPush[i][j] == ">") {
+                redirVals.push_back(2);//2 for non-append
+                redirArgs.push_back(masterPush.at(i).at(masterPush.at(i).size() - 1));//Push back last argument
+                masterPush.at(i).resize(j);
+                break;
+            }
+            else if(masterPush[i][j] == ">>") {
+                redirVals.push_back(1);// 1 for append.
+                redirArgs.push_back(masterPush.at(i).at(masterPush.at(i).size() - 1));//Push back last argument
+                masterPush.at(i).resize(j);
+                break;
+            }
+        }
+        if(redirVals.size() < i) {//if we havent pushed back
+            redirVals.push_back(-1);
+            redirArgs.push_back("");
+        }
+    }
+    //while loop that sets the pipes as needed (input/outputs with dup)
+}
+
+bool Pipe:: execute() {
+    //Call inputs/outputs as needed, pipe objects.
+    return true;//used for testing.
+    /*
+    for(unsigned i = 0; i < this->masterPush.size(); i++) {
+        for(unsigned j = 0; j < this->masterPush.at(i).size(); j++) {
+            
+        }
+    }
+    */
+}
+void Pipe::conversion() {
+    for(unsigned i = 0; i < this->masterPush.size(); i++) {
+        for(unsigned j = 0; j < this->masterPush[i].size(); j++) {
+            convertedC.push_back(convert(this->masterPush[i].at(j)));
+        }
+        masterConvert.push_back(convertedC);//Push to vector given.
+        convertedC.clear();//Empty convertedC after
+    }
+}
+void Pipe::input(const char* in_file, vector<char *> conv) {
+    char ** convertArgP = &conv[0];
+    int input = open(in_file, O_CREAT | O_RDONLY , S_IREAD | S_IWRITE);
+    pid_t tpid;
+    pid_t pid = fork();
+    if(!pid) {
+        dup2(input, STDIN_FILENO);
+        close(input);
+        if (execvp(convertArgP[0], convertArgP) < 0) {
+            perror("convertArgP[0]");
+        }
+        exit(3);
+    }
+    else {
+        do {
+            tpid = wait(&child_status);//Get child_status which is a pid.
+            if(tpid != pid) { 
+                cout << "Error!" << endl;
+            }
+        } while(tpid != pid);
+        int check = WEXITSTATUS(child_status);
+        //Check for failure status, else return true.
+        if(check == 3) {
+            return false;//yeah afaik.
+        }
+        else {
+            return true;
+        }
+    }
+    }
+}
+void Pipe::output(int redir_val, const char* out_file, vector<char *> conv) {
+    char ** convertArgP = &conv[0];
+    int out_val;
+    if(redir_val == 1) {//Appending
+        out_val = open(out_file, O_APPEND | O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+    }
+    if(redir_val == 2) {//Replacing.
+        out_val = open(out_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+    }
+    pid_t tpid;
+    pid_t pid = fork();
+    if(!pid) {
+        dup2(out_val, STDOUT_FILENO);
+        close(out_val);
+        if (execvp(convertArgP[0], convertArgP) < 0) {
+            perror("convertArgP[0]");
+        }
+        exit(3);
+    }
+    else {
+        do {
+            tpid = wait(&child_status);//Get child_status which is a pid.
+            if(tpid != pid) { 
+                cout << "Error!" << endl;
+            }
+        } while(tpid != pid);
+        int check = WEXITSTATUS(child_status);
+        //Check for failure status, else return true.
+        if(check == 3) {
+            return false;//yeah afaik.
+        }
+        else {
+            return true;
+        }
+    }
+}
+/*
+void Pipe::object(int & p[]) {
+    pid_t pid = fork();
+    if(!pid) {
+        dup2();
+        close(out_val);
+        if (execvp(convertedC[0], convertedC) < 0) {
+            perror("convertedC[0]");
+        }
+        exit(3);
+    }    
+}
+*/
+
+
+//https://stackoverflow.com/questions/23448043/how-does-the-posix-tee-command-work
+//https://stackoverflow.com/questions/1461331/writing-my-own-shell-stuck-on-pipes
+//https://stackoverflow.com/questions/2605130/redirecting-exec-output-to-a-buffer-or-file
+//https://brandonwamboldt.ca/how-linux-pipes-work-under-the-hood-1518/
+
+//todo:
+//redirect works from outside -> in
+//when to parse? in semicolon or logic?
+//change stdin -> stdout using dup2()
+//AND PIPES GODDAMN PIPES
+//how2workpipes
+
+
+
+
+
+
+
+
+
+
+/*
+//--------------------------------------------------------------------------
+// sample code for allowing read/write/append access
+//--------------------------------------------------------------------------
+
+if (fork() == 0)
+{
+    // child
+    int fd = open(file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+
+    dup2(fd, 1);   // make stdout go to file
+    dup2(fd, 2);   // make stderr go to file - you may choose to not do this
+                   // or perhaps send stderr to another file
+
+    close(fd);     // fd no longer needed - the dup'ed handles are sufficient
+
+    exec(...);
+}
+
+//--------------------------------------------------------------------------
+// sample code for redirecting using PIPES
+//--------------------------------------------------------------------------
+
+
+int pipefd[2];
+pipe(pipefd);
+
+if (fork() == 0)
+{
+    close(pipefd[0]);    // close reading end in the child
+
+    dup2(pipefd[1], 1);  // send stdout to the pipe
+    dup2(pipefd[1], 2);  // send stderr to the pipe
+
+    close(pipefd[1]);    // this descriptor is no longer needed
+
+    exec(...);
+}
+else
+{
+    // parent
+
+    char buffer[1024];
+
+    close(pipefd[1]);  // close the write end of the pipe in the parent
+
+    while (read(pipefd[0], buffer, sizeof(buffer)) != 0)
+    {
+    }
+}
+
+*/
