@@ -189,7 +189,6 @@ Execute::Execute(vector<char *> args) {
 }
 void Execute::initialize() { }
 bool Execute::execute() {
-    convertArgP = &convertedArgs[0];
     pid_t tpid;
     //Initialize child_pid, keep value for status.
     //pid_t child_pid;
@@ -197,8 +196,39 @@ bool Execute::execute() {
     //begin forking
     pid_t child_pid = fork();
     //If in child process:
+    
+    FILE* val;
+    int save;
+    int redir = 0;
+    int fd;
+    //Check redirect
+    for(unsigned i = 0; i < convertedArgs.size(); i++) {//Parse for redirects first.
+        if(*convertedArgs[i] == '<') {
+            val = fopen(convertedArgs.at(convertedArgs.size()-1), "r");
+            fd = fileno(val);
+            save = dup(0);
+            dup2(fd, 0);
+            convertedArgs.at(i) = '\0';
+            redir = 1;
+        }
+        if(*convertedArgs[i] == '>') {
+            if(*convertedArgs[i+1] == '>') {
+                val = fopen(convertedArgs.at(convertedArgs.size()-1), "a");
+            }
+            else {
+                val = fopen(convertedArgs.at(convertedArgs.size()-1), "w");
+            }
+            fd = fileno(val);
+            save = dup(1);
+            dup2(fd, 1);
+            convertedArgs.at(i) = '\0';
+            redir = 2;
+        }
+    }
+    //
     if(child_pid == 0) {
         //Run execvp
+        convertArgP = &convertedArgs[0];
         execvp(this->convertArgP[0], this->convertArgP);
         perror("The following error occurred");
         //reaches here if execvp fails.
@@ -214,6 +244,13 @@ bool Execute::execute() {
             }
         } while(tpid != child_pid);
         int check = WEXITSTATUS(child_status);
+        if(redir == 1) {
+            dup2(save, 0);
+        }
+        else if(redir == 2) {
+            dup2(save, 1);
+        }
+        
         //Check for failure status, else return true.
         if(check == 3) {
             return false;//yeah afaik.
@@ -305,19 +342,19 @@ void Pipe:: initialize() {
             if(masterPush[i][j] == "<") {
                 redirVals.push_back(3); // 3 == input redir
                 redirArgs.push_back(masterPush.at(i).at(masterPush.at(i).size() - 1));//Push back last argument
-                masterPush.at(i).resize(j);
+                masterPush.at(i).at(j) = '\0';
                 break;
             }
             else if(masterPush[i][j] == ">") {
                 redirVals.push_back(2);//2 for non-append
                 redirArgs.push_back(masterPush.at(i).at(masterPush.at(i).size() - 1));//Push back last argument
-                masterPush.at(i).resize(j);
+                masterPush.at(i).at(j) = '\0';
                 break;
             }
             else if(masterPush[i][j] == ">>") {
                 redirVals.push_back(1);// 1 for append.
                 redirArgs.push_back(masterPush.at(i).at(masterPush.at(i).size() - 1));//Push back last argument
-                masterPush.at(i).resize(j);
+                masterPush.at(i).at(j) = '\0';
                 break;
             }
         }
@@ -349,14 +386,22 @@ void Pipe::conversion() {
         convertedC.clear();//Empty convertedC after
     }
 }
-void Pipe::input(const char* in_file, vector<char *> conv) {
+bool Pipe::input(const char* in_file, vector<char *> conv) {
     char ** convertArgP = &conv[0];
-    int input = open(in_file, O_CREAT | O_RDONLY , S_IREAD | S_IWRITE);
+    
+    int input_fd;
+    int save;
+    FILE* input = fopen(in_file, "w");
+    if(input != NULL) {
+        input_fd = fileno(input);
+        save = dup(0);
+        dup2(input_fd, 0);
+    }
+    
+    int child_status;
     pid_t tpid;
     pid_t pid = fork();
     if(!pid) {
-        dup2(input, STDIN_FILENO);
-        close(input);
         if (execvp(convertArgP[0], convertArgP) < 0) {
             perror("convertArgP[0]");
         }
@@ -369,6 +414,10 @@ void Pipe::input(const char* in_file, vector<char *> conv) {
                 cout << "Error!" << endl;
             }
         } while(tpid != pid);
+        close(input_fd);
+        if(input != NULL) {
+            dup2(save, 0);
+        }
         int check = WEXITSTATUS(child_status);
         //Check for failure status, else return true.
         if(check == 3) {
@@ -378,22 +427,29 @@ void Pipe::input(const char* in_file, vector<char *> conv) {
             return true;
         }
     }
-    }
 }
-void Pipe::output(int redir_val, const char* out_file, vector<char *> conv) {
+bool Pipe::output(int redir_val, const char* out_file, vector<char *> conv) {
     char ** convertArgP = &conv[0];
-    int out_val;
+    
+    int output_fd;
+    int save;
+    FILE* out_val;
     if(redir_val == 1) {//Appending
-        out_val = open(out_file, O_APPEND | O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+        out_val = fopen(out_file, "a");
     }
     if(redir_val == 2) {//Replacing.
-        out_val = open(out_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+        out_val = fopen(out_file, "w");
     }
+    if(out_val != NULL) {
+        output_fd = fileno(out_val);
+        save = dup(1);
+        dup2(output_fd, 1);
+    }
+    
+    int child_status;
     pid_t tpid;
     pid_t pid = fork();
     if(!pid) {
-        dup2(out_val, STDOUT_FILENO);
-        close(out_val);
         if (execvp(convertArgP[0], convertArgP) < 0) {
             perror("convertArgP[0]");
         }
@@ -407,6 +463,9 @@ void Pipe::output(int redir_val, const char* out_file, vector<char *> conv) {
             }
         } while(tpid != pid);
         int check = WEXITSTATUS(child_status);
+        if(out_val != NULL) {
+            dup2(save, 1);
+        }
         //Check for failure status, else return true.
         if(check == 3) {
             return false;//yeah afaik.
@@ -416,20 +475,6 @@ void Pipe::output(int redir_val, const char* out_file, vector<char *> conv) {
         }
     }
 }
-/*
-void Pipe::object(int & p[]) {
-    pid_t pid = fork();
-    if(!pid) {
-        dup2();
-        close(out_val);
-        if (execvp(convertedC[0], convertedC) < 0) {
-            perror("convertedC[0]");
-        }
-        exit(3);
-    }    
-}
-*/
-
 
 //https://stackoverflow.com/questions/23448043/how-does-the-posix-tee-command-work
 //https://stackoverflow.com/questions/1461331/writing-my-own-shell-stuck-on-pipes

@@ -112,8 +112,8 @@ class Pipe : public Base {
     bool execute();
     void conversion();
     void object();
-    void output(int redir_val, const char* out_file, vector<char *> conv);
-    void input(const char* in_file, vector<char *> conv);
+    bool output(int redir_val, const char* out_file, vector<char *> conv);
+    bool input(const char* in_file, vector<char *> conv);
 };
 
 
