@@ -32,6 +32,8 @@ Created and maintained by Kau Chung and Andre Cuevas.
 
 -Now works with logical precedence (using parentheses)
 
+-Now works with redirects ">", ">>", "<", and piping!
+
 ## Tests
 Tested various combinations of commands, logical operators, end statements, and exit calls.
 

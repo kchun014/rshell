@@ -372,25 +372,23 @@ void Pipe:: initialize() {
 bool Pipe::execute() {
     bool return_val;
     return_val = false;
-    /*
-    save_in = dup(0);
-    save_out = dup(1);//Modify input/output
+    int save_in = dup(0);
+    int save_out = dup(1);//Modify input/output
     for(unsigned i = 0; i < this->masterPush.size(); i++) {
         for(unsigned j = 0; j < this->masterPush.at(i).size(); j++) {
             if(redirVals.at(i) == 1 || redirVals.at(i) == 2) {
-                return_val = output(redirVals.at(i), redirArgs.at(i), masterConvert[i][j]);
+                return_val = output(redirVals.at(i), masterConvert[i].at(masterConvert.at(i).size()-1), masterConvert[i]);
             }
             else if (redirVals.at(i) == 3) {
-                return_val = input(redirArgs.at(i), masterConvert[i][j]);
+                return_val = input(masterConvert[i].at(masterConvert.at(i).size()-1), masterConvert[i]);
             }
             else {
-                return_val = pipe()
+                return_val = rpipe(masterConvert[i]);
             }
         }
     }
     dup2(save_in, 0);
     dup2(save_out, 1);//Fix input/output
-    */
     return return_val;
 }
 void Pipe::conversion() {
@@ -482,6 +480,45 @@ bool Pipe::output(int redir_val, const char* out_file, vector<char *> conv) {
         if(out_val != NULL) {
             dup2(save, 1);
         }
+        //Check for failure status, else return true.
+        if(check == 3) {
+            return false;//yeah afaik.
+        }
+        else {
+            return true;
+        }
+    }
+}
+bool Pipe::rpipe(vector<char *> conv) {
+    char ** convertArgP = &conv[0];
+    int child_status;
+    pid_t tpid;
+    int pipefd[2];
+    if(pipe(pipefd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+    pid_t pid = fork();
+    if(!pid) {
+        dup2(pipefd[1], 1);
+        close(pipefd[0]);
+        if (execvp(convertArgP[0], convertArgP) < 0) {
+            perror("convertArgP[0]");
+        }
+        exit(3);
+    }
+    //assuming pipe in is correct
+    else {
+        dup2(pipefd[0], 0);
+        close(pipefd[1]);
+        do {
+            tpid = wait(&child_status);//Get child_status which is a pid.
+            if(tpid != pid) { 
+                cout << "Error!" << endl;
+            }
+        } while(tpid != pid);
+        close(pipefd[0]);
+        int check = WEXITSTATUS(child_status);
         //Check for failure status, else return true.
         if(check == 3) {
             return false;//yeah afaik.
