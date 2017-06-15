@@ -32,8 +32,6 @@ Created and maintained by Kau Chung and Andre Cuevas.
 
 -Now works with logical precedence (using parentheses)
 
--Now works with redirects ">", ">>", "<", and piping!
-
 ## Tests
 Tested various combinations of commands, logical operators, end statements, and exit calls.
 
@@ -76,5 +74,7 @@ v) Cannot mkdir with spaces.
 
 vi) Cannot check for existence of files with spaces in name.
 
-vii) Doesn't properly check for ")" before "(", nor ensure existence of ")" after.
+vii) does not test well for tr a-z A-Z
+
+ix) tee does not function properly.
 
