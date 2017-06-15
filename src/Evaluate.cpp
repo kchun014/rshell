@@ -210,9 +210,11 @@ bool Execute::execute() {
             dup2(fd, 0);
             convertedArgs.at(i) = '\0';
             redir = 1;
+            break;
         }
         if(*convertedArgs[i] == '>') {
-            if(*convertedArgs[i+1] == '>') {
+            if(strcmp(convertedArgs[i], ">>") == 0) {
+                cout << "I'm in baby" << endl;
                 val = fopen(convertedArgs.at(convertedArgs.size()-1), "a");
             }
             else {
@@ -223,6 +225,7 @@ bool Execute::execute() {
             dup2(fd, 1);
             convertedArgs.at(i) = '\0';
             redir = 2;
+            break;
         }
     }
     //
@@ -366,16 +369,29 @@ void Pipe:: initialize() {
     //while loop that sets the pipes as needed (input/outputs with dup)
 }
 
-bool Pipe:: execute() {
-    //Call inputs/outputs as needed, pipe objects.
-    return true;//used for testing.
+bool Pipe::execute() {
+    bool return_val;
+    return_val = false;
     /*
+    save_in = dup(0);
+    save_out = dup(1);//Modify input/output
     for(unsigned i = 0; i < this->masterPush.size(); i++) {
         for(unsigned j = 0; j < this->masterPush.at(i).size(); j++) {
-            
+            if(redirVals.at(i) == 1 || redirVals.at(i) == 2) {
+                return_val = output(redirVals.at(i), redirArgs.at(i), masterConvert[i][j]);
+            }
+            else if (redirVals.at(i) == 3) {
+                return_val = input(redirArgs.at(i), masterConvert[i][j]);
+            }
+            else {
+                return_val = pipe()
+            }
         }
     }
+    dup2(save_in, 0);
+    dup2(save_out, 1);//Fix input/output
     */
+    return return_val;
 }
 void Pipe::conversion() {
     for(unsigned i = 0; i < this->masterPush.size(); i++) {
@@ -475,77 +491,3 @@ bool Pipe::output(int redir_val, const char* out_file, vector<char *> conv) {
         }
     }
 }
-
-//https://stackoverflow.com/questions/23448043/how-does-the-posix-tee-command-work
-//https://stackoverflow.com/questions/1461331/writing-my-own-shell-stuck-on-pipes
-//https://stackoverflow.com/questions/2605130/redirecting-exec-output-to-a-buffer-or-file
-//https://brandonwamboldt.ca/how-linux-pipes-work-under-the-hood-1518/
-
-//todo:
-//redirect works from outside -> in
-//when to parse? in semicolon or logic?
-//change stdin -> stdout using dup2()
-//AND PIPES GODDAMN PIPES
-//how2workpipes
-
-
-
-
-
-
-
-
-
-
-/*
-//--------------------------------------------------------------------------
-// sample code for allowing read/write/append access
-//--------------------------------------------------------------------------
-
-if (fork() == 0)
-{
-    // child
-    int fd = open(file, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-
-    dup2(fd, 1);   // make stdout go to file
-    dup2(fd, 2);   // make stderr go to file - you may choose to not do this
-                   // or perhaps send stderr to another file
-
-    close(fd);     // fd no longer needed - the dup'ed handles are sufficient
-
-    exec(...);
-}
-
-//--------------------------------------------------------------------------
-// sample code for redirecting using PIPES
-//--------------------------------------------------------------------------
-
-
-int pipefd[2];
-pipe(pipefd);
-
-if (fork() == 0)
-{
-    close(pipefd[0]);    // close reading end in the child
-
-    dup2(pipefd[1], 1);  // send stdout to the pipe
-    dup2(pipefd[1], 2);  // send stderr to the pipe
-
-    close(pipefd[1]);    // this descriptor is no longer needed
-
-    exec(...);
-}
-else
-{
-    // parent
-
-    char buffer[1024];
-
-    close(pipefd[1]);  // close the write end of the pipe in the parent
-
-    while (read(pipefd[0], buffer, sizeof(buffer)) != 0)
-    {
-    }
-}
-
-*/
