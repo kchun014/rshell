@@ -1,0 +1,7 @@
+cat < garbage.txt | tr A-Z a-z | tee newOutputFile1 | tr a-z A-Z >
+newOutputFile2
+tr A-Z a-z < garbage.txt | sort 
+echo hello | tr a-z A-Z > garbage.txt
+[ -d /bin ] | sort | tr A-Z > garbage.txt
+echo hello | cat 
+  

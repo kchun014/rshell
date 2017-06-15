@@ -1,0 +1,6 @@
+cat > newfile.txt
+echo hello > newfile.txt
+sort < newfile.txt
+sort < garbage.txt
+newfile.txt < echo how am i here
+

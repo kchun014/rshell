@@ -1,0 +1,5 @@
+garbage.txt > sort
+echo hello > garbage.txt
+cat < garbage.txt | sort > newfile.txt 
+newfile.txt > sort > garbage.txt > echo hello
+

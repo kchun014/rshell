@@ -1,0 +1,5 @@
+ls -a >> garbage.txt
+echo hello >> garbage.txt
+echo hi >> >> >> garbage.txt
+>> ehco hello >> world >> garbage.txt
+
