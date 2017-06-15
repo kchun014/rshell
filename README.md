@@ -74,7 +74,6 @@ v) Cannot mkdir with spaces.
 
 vi) Cannot check for existence of files with spaces in name.
 
-vii) does not test well for tr a-z A-Z
+vii) piping leads to errors
 
-ix) tee does not function properly.
-
+viii) multicommands don't work properly
